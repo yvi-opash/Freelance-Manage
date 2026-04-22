@@ -65,7 +65,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-slate-500 mb-1">Outstanding</p>
-              <h3 className="text-2xl font-bold text-slate-800">${stats?.outstanding.toLocaleString()}</h3>
+              <h3 className="text-2xl font-bold text-slate-800">${(stats?.outstanding ?? 0).toLocaleString()}</h3>
             </div>
             <div className="p-3 bg-orange-50 rounded-xl">
               <AlertCircle className="w-6 h-6 text-orange-600" />
@@ -77,7 +77,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-slate-500 mb-1">Paid this Month</p>
-              <h3 className="text-2xl font-bold text-slate-800">${stats?.paidThisMonth.toLocaleString()}</h3>
+              <h3 className="text-2xl font-bold text-slate-800">${(stats?.paidThisMonth ?? 0).toLocaleString()}</h3>
             </div>
             <div className="p-3 bg-emerald-50 rounded-xl">
               <TrendingUp className="w-6 h-6 text-emerald-600" />
@@ -89,7 +89,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-slate-500 mb-1">Total Expenses</p>
-              <h3 className="text-2xl font-bold text-slate-800">${stats?.totalExpenses.toLocaleString()}</h3>
+              <h3 className="text-2xl font-bold text-slate-800">${(stats?.totalExpenses ?? 0).toLocaleString()}</h3>
             </div>
             <div className="p-3 bg-indigo-50 rounded-xl">
               <DollarSign className="w-6 h-6 text-indigo-600" />
@@ -110,7 +110,7 @@ const Dashboard = () => {
                   </div>
                   <span className="font-bold text-slate-700">{client.name}</span>
                 </div>
-                <span className="font-bold text-indigo-600">${client.revenue.toLocaleString()}</span>
+                <span className="font-bold text-indigo-600">${(client.revenue ?? 0).toLocaleString()}</span>
               </div>
             ))}
             {stats?.topClients.length === 0 && (
