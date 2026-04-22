@@ -1,6 +1,6 @@
 import Project from "../model/project.model";
 
-export const createProject = async (userId: string, data : any) => {
+export const createProjects = async (userId: string, data : any) => {
  return Project.create({...data, userId});
 };
 
@@ -10,10 +10,10 @@ export const getProjects = async (userId: string) => {
 };
 
 
-export const updateProject = async (userId: string, id: string, data: any) => {
+export const updateProjects = async (userId: string, id: string, data: any) => {
     return Project.findOneAndUpdate({ _id: id, userId }, data, { new: true });
 };
 
-export const deleteProject = async (userId : string, id : string) => {
+export const deleteProjects = async (userId : string, id : string) => {
     return Project.findOneAndDelete({ _id: id, userId });
 };
