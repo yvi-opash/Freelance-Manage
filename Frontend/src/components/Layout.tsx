@@ -43,7 +43,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
             <Briefcase className="w-6 h-6" />
           </div>
-          <span className="font-bold text-xl tracking-tight text-slate-800">FreeFlow</span>
+          <span className="font-bold text-xl tracking-tight text-slate-800">Freelance</span>
         </div>
         
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
@@ -80,7 +80,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
                 <Briefcase className="w-5 h-5" />
             </div>
-            <span className="font-bold text-lg text-slate-800">FreeFlow</span>
+            <span className="font-bold text-lg text-slate-800">Freelance</span>
         </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-slate-600">
           {isMobileMenuOpen ? <X /> : <Menu />}

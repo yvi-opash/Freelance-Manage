@@ -10,6 +10,7 @@ import Modal from '../components/Modal';
 import Button from '../components/Button';
 import FormField from '../components/FormField';
 import Toast from '../components/Toast';
+import ConfirmModal from '../components/ConfirmModal';
 import { Project, Client } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
@@ -28,6 +29,7 @@ const Projects = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   
   const queryClient = useQueryClient();
   const token = localStorage.getItem('token');
@@ -75,7 +77,8 @@ const Projects = () => {
 
   const handleEdit = (project: Project) => {
     setEditingProject(project);
-    setValue('clientId', project.clientId);
+    const clientId = typeof project.clientId === 'object' ? (project.clientId as any)._id : project.clientId;
+    setValue('clientId', clientId);
     setValue('name', project.name);
     setValue('description', project.description);
     setValue('hourRate', project.hourRate);
@@ -83,9 +86,25 @@ const Projects = () => {
     setIsModalOpen(true);
   };
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return axios.delete(`${API_URL}/projects/${id}`, { headers });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      setToast({ message: 'Project deleted successfully', type: 'success' });
+    },
+    onError: (error: any) => {
+      setToast({ message: error.response?.data?.message || 'Error deleting project', type: 'error' });
+    },
+  });
+
   const onSubmit = (data: ProjectForm) => mutation.mutate(data);
 
-  const getClientName = (id: string) => clients.find(c => c._id === id)?.name || 'Unknown';
+  const getClientName = (id: any) => {
+    if (typeof id === 'object' && id?._id) return id.name;
+    return clients.find(c => c._id === id)?.name || 'Unknown';
+  };
 
   const columns = [
     { 
@@ -108,7 +127,10 @@ const Projects = () => {
     },
     { 
       header: 'Rate', 
-      accessor: (p: Project) => <span className="font-semibold text-slate-700">${p.hourRate}/hr</span> 
+      accessor: (p: any) => {
+        const currency = p.clientId?.currency || '$';
+        return <span className="font-semibold text-slate-700">{currency} {p.hourRate}/hr</span>;
+      }
     },
     { 
       header: 'Status', 
@@ -145,7 +167,25 @@ const Projects = () => {
         data={projects} 
         isLoading={isProjectsLoading} 
         onEdit={handleEdit}
-        onDelete={(p) => { if(confirm('Archive project?')) mutation.mutate({ ...p, status: 'archived' }); }}
+        onDelete={(p) => setDeleteConfirm(p._id)}
+        deletingId={deleteMutation.isPending ? (deleteMutation.variables as string) : undefined}
+      />
+
+      <ConfirmModal
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={() => {
+          if (deleteConfirm) {
+            deleteMutation.mutate(deleteConfirm, {
+              onSuccess: () => {
+                setDeleteConfirm(null);
+              }
+            });
+          }
+        }}
+        title="Delete Project"
+        message="Are you sure you want to delete this project? This will also remove all linked time entries."
+        isLoading={deleteMutation.isPending}
       />
 
       <Modal 
@@ -179,7 +219,7 @@ const Projects = () => {
           </FormField>
 
           <div className="grid grid-cols-2 gap-4">
-            <FormField label="Hourly Rate ($)" error={errors.hourRate?.message}>
+            <FormField label="Hourly Rate" error={errors.hourRate?.message}>
               <div className="relative">
                 <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input 

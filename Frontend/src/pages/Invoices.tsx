@@ -10,6 +10,7 @@ import Modal from '../components/Modal';
 import Button from '../components/Button';
 import FormField from '../components/FormField';
 import Toast from '../components/Toast';
+import ConfirmModal from '../components/ConfirmModal';
 import Card from '../components/Card';
 import { Invoice, Client, Project, TimeEntry } from '../types';
 
@@ -34,6 +35,7 @@ type InvoiceForm = z.infer<typeof invoiceSchema>;
 const Invoices = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   
   const queryClient = useQueryClient();
   const token = localStorage.getItem('token');
@@ -104,9 +106,23 @@ const Invoices = () => {
   const lineItems = watch('lineItems');
   const tax = watch('tax');
   const discount = watch('discount');
+  const currency = watch('currency');
   
   const subtotal = lineItems?.reduce((acc, item) => acc + (item.amount || 0), 0) || 0;
   const total = subtotal + (subtotal * (tax || 0) / 100) - (subtotal * (discount || 0) / 100);
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return axios.delete(`${API_URL}/invoices/${id}`, { headers });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      setToast({ message: 'Invoice deleted', type: 'success' });
+    },
+    onError: () => {
+      setToast({ message: 'Error deleting invoice', type: 'error' });
+    },
+  });
 
   const columns = [
     { 
@@ -125,12 +141,15 @@ const Invoices = () => {
     },
     { 
       header: 'Client', 
-      accessor: (i: any) => clients.find(c => c._id === i.clientId)?.name || 'Unknown' 
+      accessor: (i: any) => {
+        if (typeof i.clientId === 'object' && i.clientId?.name) return i.clientId.name;
+        return clients.find(c => c._id === i.clientId)?.name || 'Unknown';
+      }
     },
     { 
       header: 'Amount', 
       accessor: (i: Invoice) => (
-        <span className="font-bold text-slate-700">{i.currency} {i.totalAmount.toLocaleString()}</span>
+        <span className="font-bold text-slate-700">{i.currency} {(i.totalAmount ?? 0).toLocaleString()}</span>
       ) 
     },
     { 
@@ -179,7 +198,23 @@ const Invoices = () => {
         columns={columns} 
         data={invoices} 
         isLoading={isInvoicesLoading} 
-        onDelete={(i) => { if(confirm('Delete invoice?')) axios.delete(`${API_URL}/invoices/${i._id}`, { headers }).then(() => queryClient.invalidateQueries({ queryKey: ['invoices'] })); }}
+        onDelete={(i) => setDeleteConfirm(i._id)}
+        deletingId={deleteMutation.isPending ? (deleteMutation.variables as string) : undefined}
+      />
+
+      <ConfirmModal
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={() => {
+          if (deleteConfirm) {
+            deleteMutation.mutate(deleteConfirm, {
+              onSuccess: () => setDeleteConfirm(null)
+            });
+          }
+        }}
+        title="Delete Invoice"
+        message="Are you sure you want to delete this invoice? This action cannot be undone."
+        isLoading={deleteMutation.isPending}
       />
 
       <Modal 
@@ -253,7 +288,7 @@ const Invoices = () => {
             <div className="space-y-2 text-sm">
                 <div className="flex justify-between text-slate-500">
                     <span>Subtotal</span>
-                    <span className="font-bold">${subtotal.toLocaleString()}</span>
+                    <span className="font-bold">{currency} {subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="flex-1 flex gap-2 items-center">
@@ -270,7 +305,7 @@ const Invoices = () => {
                 <hr className="my-2 border-slate-200" />
                 <div className="flex justify-between text-lg font-extrabold text-slate-800">
                     <span>Total Due</span>
-                    <span className="text-indigo-600">${total.toLocaleString()}</span>
+                    <span className="text-indigo-600">{currency} {total.toLocaleString()}</span>
                 </div>
             </div>
           </Card>

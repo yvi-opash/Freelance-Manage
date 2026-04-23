@@ -62,7 +62,7 @@ const Login = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-2xl text-white shadow-xl shadow-indigo-200 mb-4 animate-bounce">
             <Briefcase className="w-8 h-8" />
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-800">FreeFlow</h1>
+          <h1 className="text-3xl font-extrabold text-slate-800">Freelance</h1>
           <p className="text-slate-500 mt-2">Manage your freelance business with ease</p>
         </div>
 
@@ -132,7 +132,7 @@ const Login = () => {
         </div>
 
         <p className="text-center text-slate-400 text-sm mt-8">
-          © 2024 FreeFlow. All rights reserved.
+           Freelance Manager. All rights reserved.
         </p>
       </div>
 

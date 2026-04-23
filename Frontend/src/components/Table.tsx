@@ -13,10 +13,11 @@ interface TableProps<T> {
   data: T[];
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
+  deletingId?: string;
   isLoading?: boolean;
 }
 
-function Table<T extends { _id: string }>({ columns, data, onEdit, onDelete, isLoading }: TableProps<T>) {
+function Table<T extends { _id: string }>({ columns, data, onEdit, onDelete, deletingId, isLoading }: TableProps<T>) {
   if (isLoading) {
     return (
       <div className="w-full bg-white rounded-xl border border-slate-100 overflow-hidden shadow-sm">
@@ -72,7 +73,7 @@ function Table<T extends { _id: string }>({ columns, data, onEdit, onDelete, isL
                   ))}
                   {(onEdit || onDelete) && (
                     <td className="px-6 py-4 text-sm text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center justify-end gap-2 transition-opacity">
                         {onEdit && (
                           <button 
                             onClick={() => onEdit(item)}
@@ -84,9 +85,18 @@ function Table<T extends { _id: string }>({ columns, data, onEdit, onDelete, isL
                         {onDelete && (
                           <button 
                             onClick={() => onDelete(item)}
-                            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                            disabled={deletingId === item._id}
+                            className={`p-2 rounded-lg transition-all ${
+                                deletingId === item._id 
+                                ? 'text-slate-300' 
+                                : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50'
+                            }`}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            {deletingId === item._id ? (
+                                <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
+                            ) : (
+                                <Trash2 className="w-4 h-4" />
+                            )}
                           </button>
                         )}
                       </div>

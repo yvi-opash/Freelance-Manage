@@ -1,17 +1,21 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.middleware";
 import {
-  createTimeEntry,
+  createTimeEntryController,
   getTimeEntry,
-  deleteTimeEntry,
+  deleteTimeEntryController,
+  startTimer,
+  stopTimer,
 } from "../controllers/time.controller";
 
 const router = Router();
 
 router.use(authMiddleware);
 
-router.post("/", createTimeEntry);
+router.post("/", createTimeEntryController);
 router.get("/", getTimeEntry);
-router.delete("/:id", deleteTimeEntry);
+router.delete("/:id", deleteTimeEntryController);
+router.post("/start", startTimer);
+router.post("/:id/stop", stopTimer);
 
 export default router;

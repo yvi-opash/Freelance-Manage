@@ -4,12 +4,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import axios from 'axios';
-import { Plus, Receipt, DollarSign, Tag, Calendar, Image as ImageIcon, Briefcase } from 'lucide-react';
+import { Plus, Banknote, Coins, Tag, Calendar, Image as ImageIcon, Briefcase, Download } from 'lucide-react';
 import Table from '../components/Table';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
 import FormField from '../components/FormField';
 import Toast from '../components/Toast';
+import ConfirmModal from '../components/ConfirmModal';
 import { Expense, Project } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
@@ -29,6 +30,7 @@ const Expenses = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   
   const queryClient = useQueryClient();
   const token = localStorage.getItem('token');
@@ -70,6 +72,24 @@ const Expenses = () => {
     },
   });
 
+  const handleDownloadReport = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/expenses/download`, {
+        headers,
+        responseType: 'blob'
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `expense-report-${new Date().toISOString().split('T')[0]}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      setToast({ message: 'Error downloading report', type: 'error' });
+    }
+  };
+
   const handleEdit = (expense: Expense) => {
     setEditingExpense(expense);
     setValue('projectId', expense.projectId);
@@ -80,7 +100,23 @@ const Expenses = () => {
     setIsModalOpen(true);
   };
 
-  const getProjectName = (id?: string) => id ? projects.find(p => p._id === id)?.name : 'General';
+  const getProjectName = (id: any) => {
+    if (typeof id === 'object' && id?._id) return id.name;
+    return id ? projects.find(p => p._id === id)?.name : 'General';
+  };
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return axios.delete(`${API_URL}/expenses/${id}`, { headers });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      setToast({ message: 'Expense deleted', type: 'success' });
+    },
+    onError: () => {
+      setToast({ message: 'Error deleting expense', type: 'error' });
+    },
+  });
 
   const columns = [
     { 
@@ -88,7 +124,7 @@ const Expenses = () => {
       accessor: (e: Expense) => (
         <div className="flex items-center gap-3">
           <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
-            <Receipt className="w-4 h-4" />
+            <Banknote className="w-4 h-4" />
           </div>
           <div>
             <div className="font-bold text-slate-800">{e.description}</div>
@@ -108,7 +144,10 @@ const Expenses = () => {
     },
     { 
       header: 'Amount', 
-      accessor: (e: Expense) => <span className="font-bold text-slate-800">${e.amount.toLocaleString()}</span> 
+      accessor: (e: any) => {
+        const currency = e.projectId?.clientId?.currency || '';
+        return <span className="font-bold text-slate-800">{currency} {e.amount.toLocaleString()}</span>;
+      }
     },
     { 
         header: 'Date', 
@@ -130,10 +169,16 @@ const Expenses = () => {
           <h1 className="text-2xl font-bold text-slate-800">Expenses</h1>
           <p className="text-slate-500 text-sm">Track your overheads and project-linked costs.</p>
         </div>
-        <Button onClick={() => { setEditingExpense(null); reset(); setIsModalOpen(true); }}>
-          <Plus className="w-4 h-4" />
-          Log Expense
-        </Button>
+        <div className="flex gap-3">
+          <Button variant="secondary" onClick={handleDownloadReport}>
+            <Download className="w-4 h-4" />
+            Download Report
+          </Button>
+          <Button onClick={() => { setEditingExpense(null); reset(); setIsModalOpen(true); }}>
+            <Plus className="w-4 h-4" />
+            Log Expense
+          </Button>
+        </div>
       </div>
 
       <Table 
@@ -141,7 +186,23 @@ const Expenses = () => {
         data={expenses} 
         isLoading={isExpensesLoading} 
         onEdit={handleEdit}
-        onDelete={(e) => { if(confirm('Delete expense?')) axios.delete(`${API_URL}/expenses/${e._id}`, { headers }).then(() => queryClient.invalidateQueries({ queryKey: ['expenses'] })); }}
+        onDelete={(e) => setDeleteConfirm(e._id)}
+        deletingId={deleteMutation.isPending ? (deleteMutation.variables as string) : undefined}
+      />
+
+      <ConfirmModal
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={() => {
+          if (deleteConfirm) {
+            deleteMutation.mutate(deleteConfirm, {
+              onSuccess: () => setDeleteConfirm(null)
+            });
+          }
+        }}
+        title="Delete Expense"
+        message="Are you sure you want to delete this expense entry?"
+        isLoading={deleteMutation.isPending}
       />
 
       <Modal 
@@ -151,9 +212,9 @@ const Expenses = () => {
       >
         <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <FormField label="Amount ($)" error={errors.amount?.message}>
+            <FormField label="Amount" error={errors.amount?.message}>
                 <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Coins className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input {...register('amount', { valueAsNumber: true })} type="number" step="0.01" className="input-field pl-10" />
                 </div>
             </FormField>

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { 
   TrendingUp, 
   Clock, 
-  DollarSign, 
+  Wallet, 
   AlertCircle,
   Briefcase,
   Users,
@@ -65,7 +65,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-slate-500 mb-1">Outstanding</p>
-              <h3 className="text-2xl font-bold text-slate-800">${(stats?.outstanding ?? 0).toLocaleString()}</h3>
+              <h3 className="text-2xl font-bold text-slate-800">{(stats?.outstanding ?? 0).toLocaleString()}</h3>
             </div>
             <div className="p-3 bg-orange-50 rounded-xl">
               <AlertCircle className="w-6 h-6 text-orange-600" />
@@ -77,7 +77,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-slate-500 mb-1">Paid this Month</p>
-              <h3 className="text-2xl font-bold text-slate-800">${(stats?.paidThisMonth ?? 0).toLocaleString()}</h3>
+              <h3 className="text-2xl font-bold text-slate-800">{(stats?.paidThisMonth ?? 0).toLocaleString()}</h3>
             </div>
             <div className="p-3 bg-emerald-50 rounded-xl">
               <TrendingUp className="w-6 h-6 text-emerald-600" />
@@ -89,10 +89,10 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-slate-500 mb-1">Total Expenses</p>
-              <h3 className="text-2xl font-bold text-slate-800">${(stats?.totalExpenses ?? 0).toLocaleString()}</h3>
+              <h3 className="text-2xl font-bold text-slate-800">{(stats?.totalExpenses ?? 0).toLocaleString()}</h3>
             </div>
             <div className="p-3 bg-indigo-50 rounded-xl">
-              <DollarSign className="w-6 h-6 text-indigo-600" />
+              <Wallet className="w-6 h-6 text-indigo-600" />
             </div>
           </div>
         </Card>
@@ -102,7 +102,7 @@ const Dashboard = () => {
         {/* Top Clients */}
         <Card title="Top Clients by Revenue">
           <div className="space-y-4">
-            {stats?.topClients.map((client, idx) => (
+            {stats?.topClients?.map((client, idx) => (
               <div key={idx} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl transition-hover hover:scale-[1.02] duration-200">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center font-bold text-indigo-600 border border-slate-100 shadow-sm">
@@ -110,10 +110,10 @@ const Dashboard = () => {
                   </div>
                   <span className="font-bold text-slate-700">{client.name}</span>
                 </div>
-                <span className="font-bold text-indigo-600">${(client.revenue ?? 0).toLocaleString()}</span>
+                <span className="font-bold text-indigo-600">{client.currency} {(client.revenue ?? 0).toLocaleString()}</span>
               </div>
             ))}
-            {stats?.topClients.length === 0 && (
+            {(!stats?.topClients || stats?.topClients.length === 0) && (
               <p className="text-center text-slate-400 py-8">No revenue data available yet.</p>
             )}
           </div>

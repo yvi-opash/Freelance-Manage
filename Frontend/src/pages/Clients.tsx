@@ -10,6 +10,7 @@ import Modal from '../components/Modal';
 import Button from '../components/Button';
 import FormField from '../components/FormField';
 import Toast from '../components/Toast';
+import ConfirmModal from '../components/ConfirmModal';
 import { Client } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
@@ -20,6 +21,7 @@ const clientSchema = z.object({
   company: z.string().min(2, 'Company is required'),
   billingAddress: z.string().min(5, 'Address is required'),
   currency: z.string().min(2, 'Currency is required'),
+  notes: z.string().optional(),
 });
 
 type ClientForm = z.infer<typeof clientSchema>;
@@ -28,6 +30,7 @@ const Clients = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   
   const queryClient = useQueryClient();
   const token = localStorage.getItem('token');
@@ -81,6 +84,7 @@ const Clients = () => {
     setValue('company', client.company);
     setValue('billingAddress', client.billingAddress);
     setValue('currency', client.currency);
+    setValue('notes', client.notes || '');
     setIsModalOpen(true);
   };
 
@@ -104,6 +108,10 @@ const Clients = () => {
         header: 'Currency', 
         accessor: (c: Client) => <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs font-bold uppercase">{c.currency}</span> 
     },
+    {
+        header: 'Notes',
+        accessor: (c: Client) => <span className="text-xs text-slate-400 line-clamp-1 max-w-[150px]" title={c.notes}>{c.notes || '-'}</span>
+    }
   ];
 
   return (
@@ -124,7 +132,23 @@ const Clients = () => {
         data={clients} 
         isLoading={isLoading} 
         onEdit={handleEdit}
-        onDelete={(c) => { if(confirm('Delete client?')) deleteMutation.mutate(c._id); }}
+        onDelete={(c) => setDeleteConfirm(c._id)}
+        deletingId={deleteMutation.isPending ? (deleteMutation.variables as string) : undefined}
+      />
+
+      <ConfirmModal
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={() => {
+          if (deleteConfirm) {
+            deleteMutation.mutate(deleteConfirm, {
+              onSuccess: () => setDeleteConfirm(null)
+            });
+          }
+        }}
+        title="Delete Client"
+        message="Are you sure you want to delete this client? This will also remove all their projects and data."
+        isLoading={deleteMutation.isPending}
       />
 
       <Modal 
@@ -171,6 +195,10 @@ const Clients = () => {
                 <option value="INR">INR - Indian Rupee</option>
               </select>
             </div>
+          </FormField>
+
+          <FormField label="Internal Notes (Optional)" error={errors.notes?.message}>
+            <textarea {...register('notes')} className="input-field min-h-[80px]" placeholder="Specific billing requirements, contact preferences, etc." />
           </FormField>
 
           <div className="flex gap-3 mt-6">

@@ -10,6 +10,7 @@ import Modal from '../components/Modal';
 import Button from '../components/Button';
 import FormField from '../components/FormField';
 import Toast from '../components/Toast';
+import ConfirmModal from '../components/ConfirmModal';
 import Card from '../components/Card';
 import { TimeEntry, Project } from '../types';
 
@@ -34,6 +35,7 @@ const formatDuration = (seconds: number) => {
 const TimeEntries = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [activeTimerId, setActiveTimerId] = useState<string | null>(null);
   const [timerSeconds, setTimerSeconds] = useState(0);
 
@@ -110,7 +112,23 @@ const TimeEntries = () => {
     },
   });
 
-  const getProjectName = (id: string) => projects.find(p => p._id === id)?.name || 'Unknown';
+  const deleteTimeMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return axios.delete(`${API_URL}/time/${id}`, { headers });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['time-entries'] });
+      setToast({ message: 'Time log deleted', type: 'success' });
+    },
+    onError: () => {
+      setToast({ message: 'Error deleting log', type: 'error' });
+    },
+  });
+
+  const getProjectName = (id: any) => {
+    if (typeof id === 'object' && id?._id) return id.name;
+    return projects.find(p => p._id === id)?.name || 'Unknown';
+  };
 
   const columns = [
     { 
@@ -222,7 +240,23 @@ const TimeEntries = () => {
         columns={columns} 
         data={entries} 
         isLoading={isEntriesLoading} 
-        onDelete={(e) => { if(confirm('Delete log?')) axios.delete(`${API_URL}/time/${e._id}`, { headers }).then(() => queryClient.invalidateQueries({ queryKey: ['time-entries'] })); }}
+        onDelete={(e) => setDeleteConfirm(e._id)}
+        deletingId={deleteTimeMutation.isPending ? (deleteTimeMutation.variables as string) : undefined}
+      />
+
+      <ConfirmModal
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={() => {
+          if (deleteConfirm) {
+            deleteTimeMutation.mutate(deleteConfirm, {
+              onSuccess: () => setDeleteConfirm(null)
+            });
+          }
+        }}
+        title="Delete Time Entry"
+        message="Are you sure you want to delete this time log?"
+        isLoading={deleteTimeMutation.isPending}
       />
 
       <Modal 

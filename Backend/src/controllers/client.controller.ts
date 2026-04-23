@@ -45,10 +45,11 @@ export const updateClient = async (req: AuthRequest, res: Response) => {
 
 export const deleteClient = async (req: AuthRequest, res: Response) => {
     try {
-        const deleted = await deleteClients(
+        await deleteClients(
             req.user!.id,
-            req.params.is as string
-        )
+            req.params.id as string
+        );
+        res.json({ message: "Client deleted" });
     } catch (error: any) {
         res.status(400).json({ message: error.message })
     }

@@ -11,6 +11,7 @@ export interface Client {
   company: string;
   billingAddress: string;
   currency: string;
+  notes?: string;
 }
 
 export interface Project {
@@ -66,5 +67,5 @@ export interface DashboardStats {
   outstanding: number;
   paidThisMonth: number;
   totalExpenses: number;
-  topClients: { name: string; revenue: number }[];
+  activeTimers: any[];
 }

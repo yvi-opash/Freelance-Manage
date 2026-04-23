@@ -1,6 +1,6 @@
 import Client from '../model/client.model';
 
-export const createClients= async(data : any, userId: String) => {
+export const createClients= async(userId: string, data : any) => {
     const client = await Client.create({...data, userId });
     return client;
 }

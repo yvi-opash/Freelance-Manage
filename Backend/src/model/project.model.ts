@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-export interface IProject extends Document {
+export interface IProject extends mongoose.Document {
     userId: mongoose.Types.ObjectId;
     clientId: mongoose.Types.ObjectId;
     name: string;

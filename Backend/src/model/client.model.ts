@@ -1,12 +1,13 @@
 import mongoose, { Schema } from "mongoose";
 
-export interface IClient extends Document{
+export interface IClient extends mongoose.Document{
     userId: mongoose.Types.ObjectId;
     name : string;
     email: string;
     company: string;
     billingAddress: string;
     currency: string;
+    notes?: string;
 }
 
 const ClientSchema = new Schema<IClient>({
@@ -15,7 +16,8 @@ const ClientSchema = new Schema<IClient>({
     email: {type : String, required: true, unique: true},
     company: {type : String, required: true},
     billingAddress: {type : String, required: true},
-    currency: {type : String, required: true, default: 'INR'}
+    currency: {type : String, required: true, default: 'INR'},
+    notes: {type: String}
 }, {
     timestamps: true
 });
