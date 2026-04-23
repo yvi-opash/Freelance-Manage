@@ -40,7 +40,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       {/* Sidebar - Desktop */}
       <aside className="hidden md:flex w-64 flex-col bg-white border-r border-slate-200 sticky top-0 h-screen">
         <div className="p-6 border-b border-slate-200 flex items-center gap-3">
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+          <div className="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-200">
             <Briefcase className="w-6 h-6" />
           </div>
           <span className="font-bold text-xl tracking-tight text-slate-800">Freelance</span>
@@ -53,11 +53,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               to={item.path}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 isActive(item.path)
-                  ? 'bg-indigo-50 text-indigo-600 font-bold shadow-sm'
+                  ? 'bg-orange-50 text-orange-600 font-bold shadow-sm'
                   : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
               }`}
             >
-              <item.icon className={`w-5 h-5 ${isActive(item.path) ? 'text-indigo-600' : 'text-slate-400'}`} />
+              <item.icon className={`w-5 h-5 ${isActive(item.path) ? 'text-orange-600' : 'text-slate-400'}`} />
               {item.name}
             </Link>
           ))}
@@ -77,7 +77,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       {/* Header - Mobile */}
       <header className="md:hidden bg-white border-b border-slate-200 p-4 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+            <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center text-white">
                 <Briefcase className="w-5 h-5" />
             </div>
             <span className="font-bold text-lg text-slate-800">Freelance</span>
@@ -103,7 +103,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   to={item.path}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-4 rounded-xl ${
-                    isActive(item.path) ? 'bg-indigo-50 text-indigo-600 font-bold' : 'text-slate-600'
+                    isActive(item.path) ? 'bg-orange-50 text-orange-600 font-bold' : 'text-slate-600'
                   }`}
                 >
                   <item.icon className="w-5 h-5" />

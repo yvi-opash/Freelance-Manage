@@ -137,7 +137,7 @@ const Projects = () => {
       accessor: (p: Project) => {
         const styles = {
           active: 'bg-emerald-50 text-emerald-600 border-emerald-100',
-          completed: 'bg-indigo-50 text-indigo-600 border-indigo-100',
+          completed: 'bg-orange-50 text-orange-600 border-orange-100',
           archived: 'bg-slate-50 text-slate-600 border-slate-100',
         };
         return (
@@ -207,14 +207,14 @@ const Projects = () => {
           <FormField label="Project Name" error={errors.name?.message}>
             <div className="relative">
               <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input {...register('name')} className="input-field pl-10" placeholder="Website Redesign" />
+              <input {...register('name')} className="input-field pl-10" />
             </div>
           </FormField>
 
           <FormField label="Description" error={errors.description?.message}>
             <div className="relative">
               <Tag className="absolute left-3 top-4 w-5 h-5 text-slate-400" />
-              <textarea {...register('description')} className="input-field pl-10 min-h-[80px]" placeholder="Project scope and details..." />
+              <textarea {...register('description')} className="input-field pl-10 min-h-[80px]" />
             </div>
           </FormField>
 

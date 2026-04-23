@@ -95,7 +95,7 @@ const Clients = () => {
       header: 'Client Name', 
       accessor: (c: Client) => (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
+          <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold">
             {c.name[0]}
           </div>
           <span className="font-bold text-slate-800">{c.name}</span>
@@ -160,28 +160,28 @@ const Clients = () => {
           <FormField label="Full Name" error={errors.name?.message}>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input {...register('name')} className="input-field pl-10" placeholder="John Doe" />
+              <input {...register('name')} className="input-field pl-10" />
             </div>
           </FormField>
 
           <FormField label="Email" error={errors.email?.message}>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input {...register('email')} className="input-field pl-10" placeholder="john@client.com" />
+              <input {...register('email')} className="input-field pl-10" />
             </div>
           </FormField>
 
           <FormField label="Company Name" error={errors.company?.message}>
             <div className="relative">
               <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input {...register('company')} className="input-field pl-10" placeholder="Acme Corp" />
+              <input {...register('company')} className="input-field pl-10" />
             </div>
           </FormField>
 
           <FormField label="Billing Address" error={errors.billingAddress?.message}>
             <div className="relative">
               <MapPin className="absolute left-3 top-4 w-5 h-5 text-slate-400" />
-              <textarea {...register('billingAddress')} className="input-field pl-10 min-h-[100px]" placeholder="123 Street, City, Country" />
+              <textarea {...register('billingAddress')} className="input-field pl-10 min-h-[100px]" />
             </div>
           </FormField>
 
@@ -198,7 +198,7 @@ const Clients = () => {
           </FormField>
 
           <FormField label="Internal Notes (Optional)" error={errors.notes?.message}>
-            <textarea {...register('notes')} className="input-field min-h-[80px]" placeholder="Specific billing requirements, contact preferences, etc." />
+            <textarea {...register('notes')} className="input-field min-h-[80px]" />
           </FormField>
 
           <div className="flex gap-3 mt-6">

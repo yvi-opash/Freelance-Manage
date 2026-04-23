@@ -68,4 +68,6 @@ export interface DashboardStats {
   paidThisMonth: number;
   totalExpenses: number;
   activeTimers: any[];
+  recentInvoices: any[];
+  recentExpenses: any[];
 }

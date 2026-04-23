@@ -151,8 +151,8 @@ const TimeEntries = () => {
       header: 'Duration', 
       accessor: (e: TimeEntry) => (
         <div className="flex items-center gap-2">
-            <Clock className={`w-4 h-4 ${e.startTime ? 'text-indigo-600 animate-pulse' : 'text-slate-400'}`} />
-            <span className={`font-mono font-bold ${e.startTime ? 'text-indigo-600' : 'text-slate-700'}`}>
+            <Clock className={`w-4 h-4 ${e.startTime ? 'text-orange-600 animate-pulse' : 'text-slate-400'}`} />
+            <span className={`font-mono font-bold ${e.startTime ? 'text-orange-600' : 'text-slate-700'}`}>
                 {e.startTime ? formatDuration(timerSeconds) : formatDuration(e.duration)}
             </span>
         </div>
@@ -160,89 +160,139 @@ const TimeEntries = () => {
     },
   ];
 
+  // Calculate Stats
+  const todayDate = new Date().toISOString().split('T')[0];
+  const thisWeekStart = new Date();
+  thisWeekStart.setDate(thisWeekStart.getDate() - thisWeekStart.getDay());
+  const weekStartStr = thisWeekStart.toISOString().split('T')[0];
+
+  let todaySeconds = 0;
+  let weekSeconds = 0;
+  let billableToday = 0;
+  let runningCount = 0;
+
+  (entries as TimeEntry[]).forEach(e => {
+    let dur = e.duration || 0;
+    if (e.startTime) {
+       runningCount++;
+       if (e._id === activeTimerId) {
+          dur = timerSeconds;
+       } else {
+          const start = new Date(e.startTime).getTime();
+          const now = new Date().getTime();
+          dur += Math.floor((now - start) / 1000);
+       }
+    }
+    
+    if (e.date === todayDate) {
+       todaySeconds += dur;
+       const pid = typeof e.projectId === 'object' ? (e.projectId as any)._id : e.projectId;
+       const p = projects.find(p => p._id === pid);
+       if (p && p.hourRate) {
+          billableToday += (dur / 3600) * p.hourRate;
+       }
+    }
+    if (e.date >= weekStartStr) {
+       weekSeconds += dur;
+    }
+  });
+
+  const todayHrs = (todaySeconds / 3600).toFixed(2);
+  const weekHrs = (weekSeconds / 3600).toFixed(2);
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Time Tracking</h1>
-          <p className="text-slate-500 text-sm">Log your billable hours manually or use the timer.</p>
-        </div>
-        <div className="flex gap-2">
-            <Button variant="secondary" onClick={() => setIsModalOpen(true)}>
-                <Plus className="w-4 h-4" />
-                Manual Entry
-            </Button>
-        </div>
+        <h1 className="text-2xl font-bold text-slate-800">Time tracker</h1>
+        <Button variant="secondary" onClick={() => setIsModalOpen(true)}>
+            <Plus className="w-4 h-4" />
+            Manual entry
+        </Button>
       </div>
 
-      {/* Active Timer Card */}
-      {activeTimerId && (
-        <Card className="bg-indigo-600 text-white border-none shadow-indigo-200">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-4">
-                    <div className="p-4 bg-white/20 rounded-2xl animate-pulse">
-                        <Timer className="w-8 h-8" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="shadow-sm">
+          <p className="text-slate-500 text-sm mb-1 font-medium">Today</p>
+          <h3 className="text-2xl font-bold text-slate-800">{todayHrs} hr</h3>
+        </Card>
+        <Card className="shadow-sm">
+          <p className="text-slate-500 text-sm mb-1 font-medium">This week</p>
+          <h3 className="text-2xl font-bold text-slate-800">{weekHrs} hr</h3>
+        </Card>
+        <Card className="shadow-sm">
+          <p className="text-slate-500 text-sm mb-1 font-medium">Billable today</p>
+          <h3 className="text-2xl font-bold text-emerald-600">${Math.round(billableToday)}</h3>
+        </Card>
+        <Card className="shadow-sm">
+          <p className="text-slate-500 text-sm mb-1 font-medium">Running</p>
+          <h3 className="text-2xl font-bold text-slate-800">{runningCount}</h3>
+        </Card>
+      </div>
+
+      <Card title={<span className="text-xs tracking-wider text-slate-400 uppercase font-bold">Active Projects</span>}>
+        <div className="flex flex-col gap-2 mt-4">
+          {projects.map(project => {
+             const activeEntry = (entries as TimeEntry[]).find(e => {
+                const pid = typeof e.projectId === 'object' ? (e.projectId as any)._id : e.projectId;
+                return e.startTime && pid === project._id;
+             });
+             const isActive = !!activeEntry;
+             
+             let displayTime = '00:00:00';
+             if (isActive && activeEntry._id === activeTimerId) {
+                displayTime = formatDuration(timerSeconds);
+             } else if (isActive) {
+                const start = new Date(activeEntry.startTime!).getTime();
+                const now = new Date().getTime();
+                displayTime = formatDuration(activeEntry.duration + Math.floor((now - start) / 1000));
+             }
+
+             return (
+               <div key={project._id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors">
+                 <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-sm">
+                      {project.name.substring(0, 2).toUpperCase()}
                     </div>
                     <div>
-                        <p className="text-indigo-100 text-sm font-medium">Currently Tracking</p>
-                        <h2 className="text-xl font-bold">{getProjectName(entries.find((e: any) => e._id === activeTimerId)?.projectId)}</h2>
+                      <h3 className="font-bold text-slate-800">{project.name}</h3>
+                      <p className="text-xs text-slate-500">
+                        {project.clientId?.name || 'Unknown'} · {project.clientId?.currency || '$'}{project.hourRate}/hr
+                      </p>
                     </div>
-                </div>
-                <div className="flex items-center gap-8">
-                    <div className="text-4xl font-mono font-bold tracking-wider">
-                        {formatDuration(timerSeconds)}
-                    </div>
-                    <button 
-                        onClick={() => timerMutation.mutate({ action: 'stop', id: activeTimerId })}
-                        className="p-4 bg-white text-indigo-600 rounded-full hover:bg-indigo-50 transition-colors shadow-lg"
-                    >
-                        <Square className="w-6 h-6 fill-current" />
-                    </button>
-                </div>
-            </div>
-        </Card>
-      )}
-
-      {!activeTimerId && (
-        <Card className="bg-white border-dashed border-2 border-slate-200">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                    <div className="p-3 bg-slate-50 rounded-xl">
-                        <Play className="w-6 h-6 text-slate-400" />
-                    </div>
-                    <div>
-                        <span className="font-bold text-slate-700">Start a new timer</span>
-                        <p className="text-slate-400 text-xs">Pick a project and start work</p>
-                    </div>
-                </div>
-                <div className="flex gap-3 w-full md:w-auto">
-                    <select id="timer-project" className="input-field py-2 text-sm md:w-48">
-                        <option value="">Select Project</option>
-                        {projects.map(p => <option key={p._id} value={p._id}>{p.name}</option>)}
-                    </select>
-                    <Button 
-                        onClick={() => {
-                            const pid = (document.getElementById('timer-project') as HTMLSelectElement).value;
-                            if (pid) timerMutation.mutate({ action: 'start', data: { projectId: pid, description: 'Working on project' } });
-                            else alert('Select a project first');
-                        }}
-                        isLoading={timerMutation.isPending}
-                    >
-                        <Play className="w-4 h-4 fill-current" />
-                        Start
-                    </Button>
-                </div>
-            </div>
-        </Card>
-      )}
-
-      <Table 
-        columns={columns} 
-        data={entries} 
-        isLoading={isEntriesLoading} 
-        onDelete={(e) => setDeleteConfirm(e._id)}
-        deletingId={deleteTimeMutation.isPending ? (deleteTimeMutation.variables as string) : undefined}
-      />
+                 </div>
+                 <div className="flex items-center gap-6">
+                    <span className={`font-mono text-lg ${isActive ? 'text-orange-600 font-bold animate-pulse' : 'text-slate-600'}`}>
+                      {displayTime}
+                    </span>
+                    {isActive ? (
+                      <Button variant="secondary" className="bg-white text-rose-600 border-rose-200 hover:bg-rose-50 hover:border-rose-300" onClick={() => timerMutation.mutate({ action: 'stop', id: activeEntry._id })}>
+                        <Square className="w-4 h-4 fill-current mr-1" /> Stop
+                      </Button>
+                    ) : (
+                      <Button variant="secondary" className="bg-white text-slate-700 border-slate-200 hover:bg-slate-50" onClick={() => timerMutation.mutate({ action: 'start', data: { projectId: project._id, description: 'Working' } })}>
+                        <Play className="w-4 h-4 fill-current mr-1" /> Start
+                      </Button>
+                    )}
+                 </div>
+               </div>
+             );
+          })}
+          {projects.length === 0 && (
+             <p className="text-center text-slate-400 py-4">No active projects available.</p>
+          )}
+        </div>
+      </Card>
+      
+      <div className="mt-8">
+        <h2 className="text-xl font-bold text-slate-800 mb-4">Past Time Entries</h2>
+        <Table 
+          columns={columns} 
+          data={entries} 
+          isLoading={isEntriesLoading} 
+          onDelete={(e) => setDeleteConfirm(e._id)}
+          deletingId={deleteTimeMutation.isPending ? (deleteTimeMutation.variables as string) : undefined}
+        />
+      </div>
 
       <ConfirmModal
         isOpen={!!deleteConfirm}
@@ -276,7 +326,7 @@ const TimeEntries = () => {
           </FormField>
 
           <FormField label="Description" error={errors.description?.message}>
-            <input {...register('description')} className="input-field" placeholder="What were you working on?" />
+            <input {...register('description')} className="input-field" />
           </FormField>
 
           <div className="grid grid-cols-2 gap-4">
@@ -287,7 +337,7 @@ const TimeEntries = () => {
                   {...register('duration', { valueAsNumber: true })} 
                   type="number" 
                   className="input-field pl-10" 
-                  placeholder="60"
+                 
                 />
               </div>
             </FormField>

@@ -77,7 +77,7 @@ function Table<T extends { _id: string }>({ columns, data, onEdit, onDelete, del
                         {onEdit && (
                           <button 
                             onClick={() => onEdit(item)}
-                            className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                            className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>

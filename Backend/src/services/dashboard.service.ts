@@ -34,10 +34,22 @@ export const getDashboard = async (userId: string) => {
     startTime: { $exists: true, $ne: null } 
   }).populate("projectId");
 
+  const recentInvoices = await Invoice.find({ userId: userObjectId })
+    .sort({ createdAt: -1 })
+    .limit(4)
+    .populate("clientId");
+
+  const recentExpenses = await Expense.find({ userId: userObjectId })
+    .sort({ date: -1 })
+    .limit(4)
+    .populate("projectId");
+
   return {
     outstanding: outstanding[0]?.total || 0,
     paidThisMonth: paid[0]?.total || 0,
     totalExpenses: expenses[0]?.total || 0,
     activeTimers: activeTimers || [],
+    recentInvoices: recentInvoices || [],
+    recentExpenses: recentExpenses || [],
   };
 };

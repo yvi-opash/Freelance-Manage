@@ -59,7 +59,7 @@ const Login = () => {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-2xl text-white shadow-xl shadow-indigo-200 mb-4 animate-bounce">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-600 rounded-2xl text-white shadow-xl shadow-orange-200 mb-4 animate-bounce">
             <Briefcase className="w-8 h-8" />
           </div>
           <h1 className="text-3xl font-extrabold text-slate-800">Freelance</h1>
@@ -71,7 +71,7 @@ const Login = () => {
             <button
               onClick={() => setIsLogin(true)}
               className={`flex-1 py-4 text-sm font-bold transition-colors ${
-                isLogin ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-400 hover:text-slate-600'
+                isLogin ? 'text-orange-600 border-b-2 border-orange-600' : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               Sign In
@@ -79,7 +79,7 @@ const Login = () => {
             <button
               onClick={() => setIsLogin(false)}
               className={`flex-1 py-4 text-sm font-bold transition-colors ${
-                !isLogin ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-400 hover:text-slate-600'
+                !isLogin ? 'text-orange-600 border-b-2 border-orange-600' : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               Register
@@ -95,7 +95,7 @@ const Login = () => {
                     {...register('name')}
                     type="text"
                     className="input-field pl-10"
-                    placeholder="John Doe"
+                   
                   />
                 </div>
               </FormField>
@@ -108,7 +108,7 @@ const Login = () => {
                   {...register('email')}
                   type="email"
                   className="input-field pl-10"
-                  placeholder="name@company.com"
+                 
                 />
               </div>
             </FormField>
@@ -120,7 +120,7 @@ const Login = () => {
                   {...register('password')}
                   type="password"
                   className="input-field pl-10"
-                  placeholder="••••••••"
+                 
                 />
               </div>
             </FormField>

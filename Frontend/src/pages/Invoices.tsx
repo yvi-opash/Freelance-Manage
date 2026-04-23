@@ -173,7 +173,7 @@ const Invoices = () => {
       accessor: (i: Invoice) => (
         <button 
             onClick={() => handleDownload(i._id, i.invoiceNumber)}
-            className="p-2 hover:bg-slate-50 text-indigo-600 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-50 text-orange-600 rounded-lg transition-colors"
         >
             <Download className="w-4 h-4" />
         </button>
@@ -255,7 +255,7 @@ const Invoices = () => {
                 <button 
                     type="button" 
                     onClick={() => append({ description: '', amount: 0 })}
-                    className="text-xs font-bold text-indigo-600 hover:text-indigo-700"
+                    className="text-xs font-bold text-orange-600 hover:text-orange-700"
                 >
                     + Add Item
                 </button>
@@ -265,7 +265,7 @@ const Invoices = () => {
                 <div className="flex-1">
                   <input
                     {...register(`lineItems.${index}.description` as const)}
-                    placeholder="Description"
+                   
                     className="input-field py-1.5 text-sm"
                   />
                 </div>
@@ -273,7 +273,7 @@ const Invoices = () => {
                   <input
                     {...register(`lineItems.${index}.amount` as const, { valueAsNumber: true })}
                     type="number"
-                    placeholder="Amount"
+                   
                     className="input-field py-1.5 text-sm"
                   />
                 </div>
@@ -293,19 +293,19 @@ const Invoices = () => {
                 <div className="flex items-center gap-4">
                     <div className="flex-1 flex gap-2 items-center">
                         <Percent className="w-3 h-3 text-slate-400" />
-                        <input {...register('tax', { valueAsNumber: true })} type="number" className="bg-transparent border-b border-slate-200 focus:border-indigo-500 outline-none w-12 text-center" />
+                        <input {...register('tax', { valueAsNumber: true })} type="number" className="bg-transparent border-b border-slate-200 focus:border-orange-500 outline-none w-12 text-center" />
                         <span className="text-slate-400">Tax</span>
                     </div>
                     <div className="flex-1 flex gap-2 items-center justify-end">
                         <Percent className="w-3 h-3 text-slate-400" />
-                        <input {...register('discount', { valueAsNumber: true })} type="number" className="bg-transparent border-b border-slate-200 focus:border-indigo-500 outline-none w-12 text-center" />
+                        <input {...register('discount', { valueAsNumber: true })} type="number" className="bg-transparent border-b border-slate-200 focus:border-orange-500 outline-none w-12 text-center" />
                         <span className="text-slate-400">Discount</span>
                     </div>
                 </div>
                 <hr className="my-2 border-slate-200" />
                 <div className="flex justify-between text-lg font-extrabold text-slate-800">
                     <span>Total Due</span>
-                    <span className="text-indigo-600">{currency} {total.toLocaleString()}</span>
+                    <span className="text-orange-600">{currency} {total.toLocaleString()}</span>
                 </div>
             </div>
           </Card>

@@ -123,7 +123,7 @@ const Expenses = () => {
       header: 'Expense', 
       accessor: (e: Expense) => (
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+          <div className="p-2 bg-orange-50 rounded-lg text-orange-600">
             <Banknote className="w-4 h-4" />
           </div>
           <div>
@@ -240,14 +240,14 @@ const Expenses = () => {
           <FormField label="Description" error={errors.description?.message}>
             <div className="relative">
               <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input {...register('description')} className="input-field pl-10" placeholder="Hosting fees, hardware, etc." />
+              <input {...register('description')} className="input-field pl-10" />
             </div>
           </FormField>
 
           <FormField label="Receipt URL (Optional)" error={errors.receipt?.message}>
             <div className="relative">
               <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input {...register('receipt')} className="input-field pl-10" placeholder="https://..." />
+              <input {...register('receipt')} className="input-field pl-10" />
             </div>
           </FormField>
 
